@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upscale image</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+  <div class="container-sm">
+    <div id="responseMessage"></div>
+    <div class="px-4 py-5 my-5 text-center">
+      <img class="d-block mx-auto mb-4" src="{{url_for('static', filename='logo.png')}}" alt="" width="72" height="72">
+      <h1 class="display-5 fw-bold text-body-emphasis">Image super-resolution</h1>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <form id="uploadForm" class="row g-3" enctype="multipart/form-data">
+          <div class="col-12">
+            <input name="file" class="form-control form-control-lg" id="fileInput" type="file" accept="image/*" required>
+            <div class="form-text">
+              ! Images above 1MP will greatly increase processing time.
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input name='artifact_filter' class="form-check-input" type="checkbox" id="artifactFilter">
+              <label class="form-check-label" for="artifactFilter">
+                Apply artifact filtering
+              </label>
+            </div>
+          </div>
+          <div class="col-12 text-center">
+            <button type="submit" id="submitButton" class="btn btn-primary">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    const form = document.getElementById('uploadForm');
+    const responseMessage = document.getElementById('responseMessage');
+    const submitButton = document.getElementById('submitButton')
+    const artifactFilter = document.getElementById('artifactFilter');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert("Please select a file!");
+            return;
+        }
+        
+        submitButton.disabled = true
+        fileInput.disabled = true
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span role="status"> Processing...</span>'
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Append checkbox value if checked
+        if (artifactFilter.checked) {
+          formData.append('artifact_filter', 'true');
+        }
+
+
+        try {
+          // Send file to the server
+          const response = await fetch('{{url_for("upload_image")}}', {
+            method: 'POST',
+            body: formData,
+          });
+  
+          if (response.ok) {
+            window.location.href = "{{url_for('success')}}";
+          } else {
+            responseMessage.innerHTML = '<div class="alert alert-danger">'+response.statusText+'</div>';
+          }
+        } catch (error) {
+            uploadingSpinner.style.display = 'none';
+            processingSpinner.style.display = 'none';
+            responseMessage.innerHTML = `<div class="alert alert-danger">An error occurred: ${error.message}</div>`;
+        }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

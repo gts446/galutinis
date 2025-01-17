@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Zoom Example</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        /* Main image container */
+        .image-container {
+            position: relative;
+            width: auto;
+            height: auto;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        /* The main image */
+        .main-image {
+            width: 100%;
+            height: 100%;
+            /*object-fit: cover;*/
+        }
+
+        /* The zoom container */
+        .zoom-container {
+            position: relative;
+            width: 100%;
+            height: 50vh;
+            overflow: hidden;
+        }
+
+        /* The zoomed image inside the zoom container */
+        .zoomed-image {
+            position: relative;
+            width: auto;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-8">
+                <div class="image-container">
+                    <img src="{{filepath['generated']}}" alt="Main Image" class="main-image" id="mainImage">
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="row">
+                    <div class="zoom-container" id="zoomContainer1">
+                        <img src="{{filepath['generated']}}" alt="Zoomed Image" class="zoomed-image" id="zoomedImage1">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="zoom-container" id="zoomContainer2">
+                        <img src="{{filepath['original']}}" alt="Zoomed Image" class="zoomed-image" id="zoomedImage2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mainImage = document.getElementById("mainImage");
+        const zoomedImage1 = document.getElementById("zoomedImage1");
+        const zoomContainer1 = document.getElementById("zoomContainer1");
+
+        const zoomedImage2 = document.getElementById("zoomedImage2");
+        const zoomContainer2 = document.getElementById("zoomContainer2");
+
+        // Handle mouse movement over the main image
+        mainImage.addEventListener("mousemove", (e) => {
+            const mainImageRect = mainImage.getBoundingClientRect();
+            const zoomContainerRect = zoomContainer1.getBoundingClientRect();
+
+            // Calculate the position of the cursor relative to the main image
+            const x = e.clientX - mainImageRect.left;
+            const y = e.clientY - mainImageRect.top;
+
+            // Calculate the scale factor between the main image and the high-res image
+            const scaleX = zoomedImage1.naturalWidth / mainImage.offsetWidth;
+            const scaleY = zoomedImage1.naturalHeight / mainImage.offsetHeight;
+
+            // Adjust the position of the zoomed image to match the cursor
+            const zoomX = Math.max(0, Math.min(x * scaleX - zoomContainerRect.width/2, zoomedImage1.naturalWidth - zoomContainerRect.width));
+            const zoomY = Math.max(0, Math.min(y * scaleY - zoomContainerRect.height/2, zoomedImage1.naturalHeight - zoomContainerRect.height));
+
+            zoomedImage1.style.left = `-${zoomX}px`;
+            zoomedImage1.style.top = `-${zoomY}px`;
+
+            zoomedImage2.style.left = `-${zoomX}px`;
+            zoomedImage2.style.top = `-${zoomY}px`;
+        });
+
+        // Hide the zoom container when the mouse leaves the main image
+        mainImage.addEventListener("mouseleave", () => {
+            zoomContainer1.style.visibility = "visible";
+        });
+
+        // Show the zoom container when the mouse enters the main image
+        mainImage.addEventListener("mouseenter", () => {
+            zoomContainer1.style.visibility = "visible";
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Ignore Python compiled files
+__pycache__/
+*.pyc
+
+# Ignore environment files
+.venv
+
+my_dataset_200x200.pt
+my_dataset_x6.pt
+my_dataset.pt
